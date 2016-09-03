@@ -19,11 +19,11 @@
     "removeComments": false,
     "rootDir": "./src",
     "sourceMap": true,
-    "strictNullChecks": true,
+    "strictNullChecks": false,
     "target": "es5"
   },
   "files": [
-    "./src/"
+    "./src/**/*.ts"
   ],
   "exclude": [
     "node_modules"
