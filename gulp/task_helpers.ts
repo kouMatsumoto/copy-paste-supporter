@@ -1,19 +1,46 @@
 import * as child_process from 'child_process';
+import * as path from 'path';
+import * as gulp from 'gulp';
 const resolveBin = require('resolve-bin');
 
 
+/**
+ *  If the string passed in is a glob, returns it, otherwise append '**\/*' to it.
+ */
+function _globify(maybeGlob: string, suffix = '**/*') {
+  return maybeGlob.indexOf('*') != -1 ? maybeGlob : path.join(maybeGlob, suffix);
+}
+
+
 /** Options that can be passed to execTask or execNodeTask. */
-interface ExecTaskOptions {
+export interface ExecTaskOptions {
   // Whether to output to STDERR and STDOUT.
   silent?: boolean;
   // If an error happens, this will replace the standard error.
   errMessage?: string;
 }
 
+
+/**
+ * If process.platform is win32, exec binPath by node command.
+ *
+ * @param binPath
+ * @param args
+ */
+function execChildProcessSpawn(binPath: string, args: string[]) {
+  if (process.platform !== 'win32') {
+    return child_process.spawn(binPath, args);
+  }
+
+  args.unshift(binPath);
+  return child_process.spawn('node', args);
+};
+
+
 /** Create a task that executes a binary as if from the command line. */
 function execTask(binPath: string, args: string[], options: ExecTaskOptions = {}) {
   return (done: (err?: string) => void) => {
-    const childProcess = execSpawn(binPath, args);
+    const childProcess = execChildProcessSpawn(binPath, args);
 
     if (!options.silent) {
       childProcess.stdout.on('data', (data: string) => {
@@ -38,6 +65,7 @@ function execTask(binPath: string, args: string[], options: ExecTaskOptions = {}
     });
   }
 }
+
 
 /**
  * Create a task that executes an NPM Bin, by resolving the binary path then executing it. These are
@@ -66,17 +94,10 @@ export function execNodeTask(packageName: string, executable: string | string[],
   }
 }
 
-/**
- * If process.platform is win32, exec binPath by node command.
- *
- * @param binPath
- * @param args
- */
-function execSpawn(binPath: string, args: string[]) {
-  if (process.platform !== 'win32') {
-    return child_process.spawn(binPath, args);
-  }
 
-  args.unshift(binPath);
-  return child_process.spawn('node', args);
-};
+/** Copy files from a glob to a destination. */
+export function copyTask(srcGlobOrDir: string, outRoot: string) {
+  return () => {
+    return gulp.src(_globify(srcGlobOrDir)).pipe(gulp.dest(outRoot));
+  }
+}
