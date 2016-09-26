@@ -7,8 +7,8 @@ const resolveBin = require('resolve-bin');
 /**
  *  If the string passed in is a glob, returns it, otherwise append '**\/*' to it.
  */
-function _globify(maybeGlob: string, suffix = '**/*') {
-  return maybeGlob.indexOf('*') != -1 ? maybeGlob : path.join(maybeGlob, suffix);
+function _globify(maybeGlob: string, suffix = '**/*'): string {
+  return maybeGlob.includes('*') ? maybeGlob : path.join(maybeGlob, suffix);
 }
 
 
@@ -34,7 +34,7 @@ function execChildProcessSpawn(binPath: string, args: string[]) {
 
   args.unshift(binPath);
   return child_process.spawn('node', args);
-};
+}
 
 
 /** Create a task that executes a binary as if from the command line. */
@@ -91,13 +91,5 @@ export function execNodeTask(packageName: string, executable: string | string[],
         execTask(binPath, args, options)(done);
       }
     });
-  }
-}
-
-
-/** Copy files from a glob to a destination. */
-export function copyTask(srcGlobOrDir: string, outRoot: string) {
-  return () => {
-    return gulp.src(_globify(srcGlobOrDir)).pipe(gulp.dest(outRoot));
   }
 }
