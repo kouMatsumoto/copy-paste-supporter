@@ -1,4 +1,4 @@
-import {task, src, dest} from 'gulp';
+import {task, src, dest, watch} from 'gulp';
 import {join} from 'path';
 import {SOURCE_ROOT, DIST_ROOT, NPM_MODULES_TO_SERVE_IN_DEVELOP, SOURCE_STATIC_FILES} from "../constants";
 import WritableStream = NodeJS.WritableStream;
@@ -29,3 +29,10 @@ task('copy:static-files', () => {
     .pipe(<WritableStream>dest(DIST_ROOT));
 });
 
+
+/** Watch tasks in development */
+task('watch:dev', () => {
+  watch(join(SOURCE_ROOT, '**/*.ts'), ['tsc:app']);
+  watch(join(SOURCE_ROOT, 'index.html'), ['copy:static-files']);
+  watch(join(SOURCE_ROOT, 'systemjs.config.js'), ['copy:static-files']);
+});
