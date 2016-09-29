@@ -1,6 +1,10 @@
 import * as child_process from 'child_process';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as gulp from 'gulp';
+import * as gulpTs from 'gulp-typescript';
+import ReadWriteStream = NodeJS.ReadWriteStream;
+import WritableStream = NodeJS.WritableStream;
 const resolveBin = require('resolve-bin');
 
 
@@ -92,4 +96,36 @@ export function execNodeTask(packageName: string, executable: string | string[],
       }
     });
   }
+}
+
+
+/**
+ * TS build task based on the options
+ */
+export function tsBuildTask(tsConfigPathOrDir: string) {
+  let tsConfigPath;
+  let tsConfigDir;
+
+  // Check Whether tsConfigPathOrDir is directory or path of tsconfig
+  try {
+    fs.accessSync(path.join(tsConfigPathOrDir, 'tsconfig.json'));
+    tsConfigPath = path.join(tsConfigPathOrDir, 'tsconfig.json');
+    tsConfigDir = tsConfigPathOrDir;
+  } catch (e) {
+    tsConfigPath = tsConfigPathOrDir;
+    tsConfigDir = path.dirname(tsConfigPathOrDir);
+  }
+
+  return () => {
+    const tsConfig = JSON.parse(fs.readFileSync(tsConfigPath, 'utf-8'));
+    const dest = path.join(tsConfigDir, tsConfig['compilerOptions']['outDir']);
+    const tsProject = gulpTs.createProject(tsConfigPath, {
+      typescript: require('typescript')
+    });
+
+    return tsProject.src()
+      .pipe(<any>gulpTs(tsProject))
+      .pipe(gulp.dest(dest));
+  }
+
 }

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
@@ -17,18 +18,21 @@
     "noUnusedParameters": true,
     "outDir": "../dist",
     "removeComments": false,
-    "rootDir": "./",
+    "rootDir": ".",
     "sourceMap": true,
     "strictNullChecks": false,
-    "target": "es5"
+    "target": "es5",
+    "typeRoots": [
+      "../node_modules/@types"
+    ],
+    "types": [
+      "node",
+      "jasmine",
+      "hammerjs"
+    ]
   },
-  "files": [
-    "./**/*.ts"
-  ],
-  "typeRoots": [
-    "../node_modules/@types"
-  ],
-  "types": [
-    "node"
+  "exclude": [
+    "**/*.spec.*",
+    "system-config-spec"
   ]
 }

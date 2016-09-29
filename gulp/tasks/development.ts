@@ -1,20 +1,14 @@
 import {task, src, dest} from 'gulp';
-import * as tsc from 'gulp-typescript';
 import {join} from 'path';
-import * as typescript from 'typescript';
 import {SOURCE_ROOT, DIST_ROOT, NPM_MODULES_TO_SERVE_IN_DEVELOP, SOURCE_STATIC_FILES} from "../constants";
+import WritableStream = NodeJS.WritableStream;
+import {tsBuildTask} from '../task_helpers';
 
 
 /**
  * Transpile typescript files
  */
-task('tsc:app', () => {
-  const tsConfig = tsc.createProject(`${SOURCE_ROOT}/tsconfig.json`, {typescript: <any>typescript});
-
-  return src(join(SOURCE_ROOT, '**/*.ts'))
-    .pipe(<any>tsc(tsConfig))
-    .pipe(dest(DIST_ROOT));
-});
+task('tsc:app', tsBuildTask(join(SOURCE_ROOT)));
 
 
 /**
@@ -23,7 +17,7 @@ task('tsc:app', () => {
  */
 task('copy:node-modules-to-serve', () => {
   return src(NPM_MODULES_TO_SERVE_IN_DEVELOP, {base: 'node_modules'})
-    .pipe(dest(join(DIST_ROOT, 'node_modules')));
+    .pipe(<WritableStream>dest(join(DIST_ROOT, 'node_modules')));
 });
 
 
@@ -32,6 +26,6 @@ task('copy:node-modules-to-serve', () => {
  */
 task('copy:static-files', () => {
   return src(SOURCE_STATIC_FILES)
-    .pipe(dest(DIST_ROOT));
+    .pipe(<WritableStream>dest(DIST_ROOT));
 });
 
